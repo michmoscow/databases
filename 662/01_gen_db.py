@@ -2,7 +2,7 @@
 import sqlite3
 from random import randint
 
-db = sqlite3.connect('hw4_task1.db')
+db = sqlite3.connect('hw4_task1_01.db')
 cur = db.cursor()
 
 # Конференция без указания года проведения

@@ -1,0 +1,6 @@
+CREATE VIEW counts AS
+SELECT event_id, count(event_id) total from paper group by event_id;
+CREATE VIEW counts_accepted AS
+SELECT event_id,count(event_id) accepted from paper where accepted=1 group by event_id;
+CREATE VIEW HighPaperAcceptance AS
+SELECT name,year,total,accepted*1.0/total from conferenceevent ce join counts on ce.id=counts.event_id join counts_accepted on ce.id=counts_accepted.event_id join conference on ce.conference_id=conference.id where total>5 and accepted*1.0/total>0.75;
