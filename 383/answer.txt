@@ -1,0 +1,2 @@
+* select conf from (select q1.conference as conf from paper as q1 join paper as q2 on q1.conference=q2.conference where q1.location!=q2.locaton order by q1.conference) group by conf;
+* select title from paper where paper.conference not in (select value from conference);
