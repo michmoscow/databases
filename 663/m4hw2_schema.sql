@@ -58,10 +58,10 @@ CREATE OR REPLACE FUNCTION SubmitReview(_paper_id INT, _reviewer_id INT, _score 
 RETURNS VOID AS $$
 DECLARE
 	c INT;
-	av_count REAL;
+	av_score REAL;
 BEGIN
 	IF _score<1 OR _score>7 THEN
-		RAISE EXCEPTION 'Score out of range'
+		RAISE EXCEPTION 'Score out of range';
 	END IF;
 	
 	SELECT COUNT(*) INTO c FROM PaperReviewing
@@ -75,13 +75,23 @@ BEGIN
 		WHERE paper_id=_paper_id AND reviewer_id=_reviewer_id;
 	END IF;
 	
-	SELECT COUNT(*) INTO C 
+	SELECT COUNT(*) INTO c
 	WHERE paper_id=_paper_id;
 	
-	IF C>=3 THEN
-		SELECT AVG (score) FROM PaperReviewing
-		WHERE paper_id=_paper_id;
+	IF c>=3 THEN
+		SELECT AVG (score) into av_score FROM PaperReviewing
+		WHERE paper_id=_paper_id GROUP BY score;
 		
-RAISE EXCEPTION 'Not implemented yet';
+		IF score>4 THEN
+			UPDATE Paper SET accepted=TRUE
+			WHERE id=_paper_id;
+		ELSE
+			UPDATE Paper SET accepted=FALSE
+			WHERE id=_paper_id;
+		END IF;
+	END IF;
+			
+		
+
 END;
 $$ LANGUAGE plpgsql;
