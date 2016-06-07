@@ -56,7 +56,32 @@ INSERT INTO PaperReviewing(paper_id, reviewer_id) VALUES
 
 CREATE OR REPLACE FUNCTION SubmitReview(_paper_id INT, _reviewer_id INT, _score INT)
 RETURNS VOID AS $$
+DECLARE
+	c INT;
+	av_count REAL;
 BEGIN
+	IF _score<1 OR _score>7 THEN
+		RAISE EXCEPTION 'Score out of range'
+	END IF;
+	
+	SELECT COUNT(*) INTO c FROM PaperReviewing
+	WHERE paper_id=_paper_id AND reviewer_id=_reviewer_id;
+	
+	IF c=0 THEN
+		INSERT INTO PaperReviewing(paper_id,reviewer_id,score)
+		VALUES(_paper_id,_reviewer_id,_score);
+	ELSE
+		UPDATE PaperReviewing SET score=_score
+		WHERE paper_id=_paper_id AND reviewer_id=_reviewer_id;
+	END IF;
+	
+	SELECT COUNT(*) INTO C 
+	WHERE paper_id=_paper_id;
+	
+	IF C>=3 THEN
+		SELECT AVG (score) FROM PaperReviewing
+		WHERE paper_id=_paper_id;
+		
 RAISE EXCEPTION 'Not implemented yet';
 END;
 $$ LANGUAGE plpgsql;
