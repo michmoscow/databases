@@ -79,8 +79,7 @@ BEGIN
 	WHERE paper_id=_paper_id AND reviewer_id=_reviewer_id;
 	
 	IF c=0 THEN
-		INSERT INTO PaperReviewing(paper_id,reviewer_id,score)
-		VALUES(_paper_id,_reviewer_id,_score);
+		RAISE EXCEPTION 'Wrong reviewer';
 	ELSE
 		UPDATE PaperReviewing SET score=_score
 		WHERE paper_id=_paper_id AND reviewer_id=_reviewer_id;
