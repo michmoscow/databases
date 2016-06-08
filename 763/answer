@@ -1,0 +1,11 @@
+DROP VIEW S;
+CREATE VIEW S AS SELECT value FROM T ORDER BY VALUE;
+DROP VIEW R;
+CREATE VIEW R AS 
+	SELECT s1.value as value,COUNT(*) as count, tcount
+	FROM s s1 JOIN s s2 ON s1.value>=s2.value
+	JOIN (SELECT COUNT(*) tcount FROM S) 
+	GROUP BY s1.value;
+SELECT value,tcount FROM R WHERE
+	count=tcount/2+1;
+	
