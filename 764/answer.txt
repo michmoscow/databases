@@ -1,0 +1,46 @@
+--average share price for the week over all companies
+with TotalPrice as ( 
+  select week,avg(share_price) as t_share_price
+  from StockQuotes
+  group by week),
+--market index
+  Index as (
+    select week,t_share_price-first_value(t_share_price)
+    over (
+      order by week asc
+      rows between 1 preceding and current row)  
+      as t_index 
+    from TotalPrice),
+  CompanyIndex as (
+    select week,company,share_price-first_value(share_price)
+    over (
+      partition by company order by week asc
+      rows between 1 preceding and current row)
+    as c_index  
+    from StockQuotes
+    ),
+  SuccessCompaniesByWeek as (
+    select CompanyIndex.week,company,
+    case
+    when c_index>t_index
+      then TRUE 
+      else FALSE
+    end
+    as exceeds_average
+    from CompanyIndex join Index
+    on CompanyIndex.week=Index.week
+    ),    
+  SuccessSeriesByWeek as (
+    select week,company, bool_and (exceeds_average)
+    over (
+      partition by company order by week asc
+      rows between 2 preceding and current row)
+    as success_series  
+    from SuccessCompaniesByWeek),
+  SuccessSeries as (
+    select company, count(*) as s_count
+    from SuccessSeriesByWeek
+    where success_series=TRUE
+    group by company
+    order by s_count,company)
+select * from SuccessSeries
